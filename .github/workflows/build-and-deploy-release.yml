@@ -2,7 +2,6 @@ name: Build and Deploy on Isante Release
 on:
   repository_dispatch:
     types: [docker-build-event]
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
