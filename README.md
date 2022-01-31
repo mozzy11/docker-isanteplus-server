@@ -8,32 +8,31 @@ This repository is responsible for building the "ghcr.io/isanteplus/isanteplus" 
 
 ### Build and Publish iSantePlus Image
 ```sh
-docker-compose build --no-cache isanteplus
-docker tag <image hash> ghcr.io/isanteplus/isanteplus:<version>
-docker tag <image hash> ghcr.io/isanteplus/isanteplus:latest
-docker push ghcr.io/isanteplus/isanteplus:latest
-docker push ghcr.io/isanteplus/isanteplus:<version>
+docker-compose build --no-cache isanteplus -t ghcr.io/isanteplus/docker-isanteplus-server:latest
+docker push ghcr.io/isanteplus/docker-isanteplus-server:latest
 ```
 
 ### Use Published Image - Docker Compose
+See `docker-compose.yml` file for a working example!
 
-`docker-compose.yml`
+Sample `docker-compose` entry:
 ```json
-isanteplus-demo:
-    container_name: isanteplus-demo
-    hostname: isanteplus-demo
-    image: ghcr.io/isanteplus/isanteplus:latest
-    restart: unless-stopped
-    env_file:
-        - ./openmrs/isanteplus_demo/openmrs-server.env
+isanteplus:
+    image: ghcr.io/isanteplus/docker-isanteplus-server:latest
+    container_name: isanteplus
+    hostname: isanteplus
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: "exit 0"
     volumes:
-      - openmrs-data:/openmrs/data
-    networks:
-      - sedish
+      - /openmrs/data
+    env_file:
+      - .env
 ```
 
-`openmrs-server.env`
-```
+Sample `.env` file:
+```env
 OMRS_JAVA_MEMORY_OPTS=-Xmx2048m -Xms1024m -XX:NewSize=128m
 OMRS_CONFIG_CONNECTION_SERVER=
 OMRS_CONFIG_CREATE_DATABASE_USER=false

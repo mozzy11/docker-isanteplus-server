@@ -1,0 +1,96 @@
+# For every commit or tag that is pushed, but image from it and push this to docker hub
+
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    name: CI/CD
+    runs-on: ubuntu-latest
+    env:
+      USERNAME: ${{ secrets.RELEASE_USERNAME }}
+      TOKEN: ${{ secrets.RELEASE_TOKEN }}
+    steps:
+      -
+        name: Checkout code
+        uses: actions/checkout@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: ghcr.io/isanteplus/docker-isanteplus-server:ci
+          load: true
+          build-args: |
+            USERNAME=${{ github.actor }}
+            TOKEN=${{ secrets.GITHUB_TOKEN }}
+          cache-from: type=inline,ref=user/app:buildcache
+          cache-to: type=inline,ref=user/app:buildcache,mode=max
+     
+      - name: Pull containers
+        run: docker-compose pull qa chrome mysql
+      
+      - name: Cache containers
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Start core containers
+        run: docker-compose up -d isanteplus mysql chrome
+      
+      - name: Wait For OpenMRS
+        run: docker-compose up --exit-code-from wait wait
+      
+      - name: Show iSantePlus Logs
+        run: docker-compose logs isanteplus
+      
+      - name: Run Basic API Tests (https://www.postman.com/itechuw/workspace/haiti-sedish/collection/1525496-192e3c9f-caea-4056-8077-b67af442f01c)
+        env:
+          POSTMAN_COLLECTION: https://www.getpostman.com/collections/22647ce67595a103f9c1
+
+        run: docker-compose up --exit-code-from newman newman
+      
+      - name: Run iSantePlus QA Framework (https://github.com/IsantePlus/isanteplus-qaframework)
+        run: docker-compose up --exit-code-from qa qa
+        continue-on-error: true
+
+      - name: Publish Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          build-args: |
+            USERNAME=${{ github.actor }}
+            TOKEN=${{ secrets.GITHUB_TOKEN }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=inline,ref=user/app:buildcache
+          cache-to: type=inline,ref=user/app:buildcache,mode=max
