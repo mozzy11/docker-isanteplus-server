@@ -69,8 +69,8 @@ jobs:
       # - name: Wait For OpenMRS
       #   run: docker-compose up --exit-code-from wait wait
       
-      - run: sleep 1000
-      
+      - run: sleep 1100
+
       - name: Show iSantePlus Logs
         run: docker-compose logs isanteplus
       
@@ -82,7 +82,7 @@ jobs:
       
       - name: Run iSantePlus QA Framework (https://github.com/IsantePlus/isanteplus-qaframework)
         run: docker-compose up --exit-code-from qa qa
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Publish Docker Image
         uses: docker/build-push-action@v2
