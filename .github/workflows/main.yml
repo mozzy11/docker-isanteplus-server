@@ -66,8 +66,10 @@ jobs:
       - name: Start core containers
         run: docker-compose up -d isanteplus mysql chrome
       
-      - name: Wait For OpenMRS
-        run: docker-compose up --exit-code-from wait wait
+      # - name: Wait For OpenMRS
+      #   run: docker-compose up --exit-code-from wait wait
+      
+      - run: sleep 1000
       
       - name: Show iSantePlus Logs
         run: docker-compose logs isanteplus

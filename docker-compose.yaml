@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 services:
   mysql:
     image: ghcr.io/isanteplus/docker-isanteplus-db:v2.2.1
@@ -17,12 +17,12 @@ services:
     volumes:
       - ./db/mysql.cnf:/etc/mysql/conf.d/custom.cnf  # mysql config preconfigured to allow binlog/debezium
       - /var/lib/mysql
-    
+
   # Note: Assumes image is built and tagged as `isanteplus/docker-isanteplus-server:ci`. 
   #       Change to something like `:latest` for non-ci builds.
   isanteplus:
     restart: unless-stopped
-    image: ghcr.io/isanteplus/docker-isanteplus-server:ci
+    image: ghcr.io/isanteplus/docker-isanteplus-server:pr-14
     container_name: isanteplus
     hostname: isanteplus
     ports:
@@ -45,8 +45,7 @@ services:
       # OMRS_DEV_DEBUG_PORT: 1044
     volumes:
       - /openmrs/data
-      - ./custom_modules:/root/openmrs/distribution/openmrs_modules
-
+      - ./custom_modules:/custom_modules
 
   # QA Framework
   qa:
