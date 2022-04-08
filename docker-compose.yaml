@@ -22,7 +22,7 @@ services:
   #       Change to something like `:latest` for non-ci builds.
   isanteplus:
     restart: unless-stopped
-    image: ghcr.io/isanteplus/docker-isanteplus-server:pr-14
+    image: ghcr.io/isanteplus/docker-isanteplus-server:ci
     container_name: isanteplus
     hostname: isanteplus
     ports:
