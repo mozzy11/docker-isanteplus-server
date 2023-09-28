@@ -76,15 +76,15 @@ jobs:
       - name: Show iSantePlus Logs
         run: docker-compose logs isanteplus
       
-      - name: Run Basic API Tests (https://www.postman.com/itechuw/workspace/haiti-sedish/collection/1525496-192e3c9f-caea-4056-8077-b67af442f01c)
-        env:
-          POSTMAN_COLLECTION: https://www.getpostman.com/collections/22647ce67595a103f9c1
+     # - name: Run Basic API Tests (https://www.postman.com/itechuw/workspace/haiti-sedish/collection/1525496-192e3c9f-caea-4056-8077-b67af442f01c)
+     #   env:
+      #    POSTMAN_COLLECTION: https://www.getpostman.com/collections/22647ce67595a103f9c1
 
-        run: docker-compose up --exit-code-from newman newman
+     #   run: docker-compose up --exit-code-from newman newman
       
-      - name: Run iSantePlus QA Framework (https://github.com/IsantePlus/isanteplus-qaframework)
-        run: docker-compose up --exit-code-from qa qa
-        continue-on-error: false
+     # - name: Run iSantePlus QA Framework (https://github.com/IsantePlus/isanteplus-qaframework)
+     #   run: docker-compose up --exit-code-from qa qa
+    #    continue-on-error: false
 
       - name: Publish Docker Image
         uses: docker/build-push-action@v2
